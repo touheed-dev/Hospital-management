@@ -5,4 +5,5 @@ scrape_configs:
   - job_name: "hospital-appointment"
     metrics_path: "/metrics"
     static_configs:
-      - targets: ["host.docker.internal:5000"]
+      # Service name on the docker-compose network
+      - targets: ["hospital-app:5000"]

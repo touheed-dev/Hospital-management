@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 270 70" role="img" aria-label="MediBook">
+  <defs>
+    <linearGradient id="mb-tile" x1="8" y1="8" x2="58" y2="62" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1FCDB2"/>
+      <stop offset="1" stop-color="#0A4A47"/>
+    </linearGradient>
+    <linearGradient id="mb-shine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".30"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(3 3)">
+    <rect x="3" y="8" width="58" height="53" rx="17" fill="url(#mb-tile)"/>
+    <rect x="3" y="8" width="58" height="28" rx="17" fill="url(#mb-shine)"/>
+    <rect x="17" y="2" width="8" height="15" rx="4" fill="#FF6B4A" stroke="#0B3D3A" stroke-width="2"/>
+    <rect x="39" y="2" width="8" height="15" rx="4" fill="#FF6B4A" stroke="#0B3D3A" stroke-width="2"/>
+    <rect x="26" y="21" width="12" height="32" rx="5" fill="#ffffff"/>
+    <rect x="16" y="31" width="32" height="12" rx="5" fill="#ffffff"/>
+    <circle cx="32" cy="37" r="3.4" fill="#FF6B4A"/>
+  </g>
+  <text x="80" y="45" font-family="Fraunces, Georgia, 'Times New Roman', serif" font-size="38" font-weight="700" letter-spacing="-1" fill="#0E2B2A">Medi<tspan fill="#0F8F82" font-style="italic">Book</tspan></text>
+  <text x="82" y="62" font-family="'DM Sans', 'Segoe UI', Arial, sans-serif" font-size="9.5" font-weight="700" letter-spacing="3.2" fill="#6E807D">HOSPITAL APPOINTMENTS</text>
+</svg>

@@ -3,436 +3,164 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Hospital Appointment Booking</title>
-  <style>
-    :root {
-      --navy: #0b1b3a;
-      --navy-2: #13294f;
-      --accent: #2f6df6;
-      --accent-dark: #1d4fd1;
-      --accent-soft: #e8efff;
-      --bg: #f6f8fc;
-      --card: #ffffff;
-      --text: #14213d;
-      --muted: #66758f;
-      --border: #e2e8f2;
-      --ok: #12a26a;
-      --ok-soft: #e4f7ee;
-      --err: #d6334a;
-      --err-soft: #fdebee;
-      --warn-soft: #fff6dc;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: "Inter", "Segoe UI", Roboto, Arial, sans-serif;
-      color: var(--text);
-      background: var(--bg);
-      display: flex;
-      min-height: 100vh;
-    }
-
-    /* ---------- Sidebar ---------- */
-    .sidebar {
-      width: 260px;
-      flex-shrink: 0;
-      background: linear-gradient(180deg, var(--navy), var(--navy-2));
-      color: #cdd7ec;
-      display: flex;
-      flex-direction: column;
-      position: sticky;
-      top: 0;
-      height: 100vh;
-    }
-    .brand { display: flex; align-items: center; gap: 12px; padding: 22px 20px; border-bottom: 1px solid rgba(255,255,255,.08); }
-    .logo { width: 42px; height: 42px; border-radius: 12px; background: var(--accent); display: grid; place-items: center; color: #fff; font-size: 1.4rem; font-weight: 800; box-shadow: 0 6px 16px rgba(47,109,246,.45); }
-    .brand h1 { margin: 0; font-size: 1.1rem; color: #fff; }
-    .brand small { font-size: .68rem; letter-spacing: .06em; text-transform: uppercase; opacity: .7; }
-    .nav-label { padding: 22px 20px 8px; font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; opacity: .55; }
-    .nav button {
-      display: flex; align-items: center; justify-content: space-between; gap: 10px;
-      width: calc(100% - 24px); margin: 3px 12px; padding: 11px 12px;
-      background: none; border: 0; border-radius: 10px;
-      color: inherit; font: inherit; font-weight: 600; text-align: left; cursor: pointer;
-      transition: background .15s, color .15s;
-    }
-    .nav button:hover { background: rgba(255,255,255,.07); color: #fff; }
-    .nav button.active { background: rgba(47,109,246,.28); color: #fff; box-shadow: inset 0 0 0 1px rgba(120,160,255,.35); }
-    .pill { background: rgba(255,255,255,.14); color: #fff; font-size: .72rem; padding: 2px 9px; border-radius: 999px; }
-    .sidebar-foot { margin-top: auto; padding: 16px; }
-    .status-box { border: 1px solid rgba(255,255,255,.12); border-radius: 12px; padding: 12px 14px; font-size: .82rem; }
-    .status-box .row { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
-    .status-box code { background: rgba(255,255,255,.1); padding: 1px 6px; border-radius: 4px; }
-    .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #8a96ad; margin-right: 8px; }
-    .dot.up { background: #2ee59d; box-shadow: 0 0 8px #2ee59d; }
-    .dot.down { background: #ff5d73; }
-
-    /* ---------- Main area ---------- */
-    .main { flex: 1; min-width: 0; }
-    .topbar {
-      display: flex; align-items: center; gap: 20px;
-      padding: 14px 32px; background: #fff; border-bottom: 1px solid var(--border);
-      position: sticky; top: 0; z-index: 5;
-    }
-    .crumbs { color: var(--muted); white-space: nowrap; }
-    .crumbs b { color: var(--text); }
-    .search { flex: 1; max-width: 520px; margin: 0 auto; position: relative; }
-    .search input {
-      width: 100%; padding: 11px 16px 11px 40px; border: 1px solid var(--border);
-      border-radius: 999px; background: var(--bg); font: inherit;
-    }
-    .search::before { content: "\2315"; position: absolute; left: 16px; top: 50%; transform: translateY(-50%) scaleX(-1); color: var(--muted); font-size: 1.1rem; }
-    .badge-api { font-size: .8rem; font-weight: 600; padding: 6px 12px; border-radius: 999px; background: var(--ok-soft); color: var(--ok); white-space: nowrap; }
-    .badge-api.down { background: var(--err-soft); color: var(--err); }
-    .user { display: flex; align-items: center; gap: 10px; }
-    .avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--navy); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: .85rem; }
-    .user small { display: block; color: var(--muted); font-size: .72rem; }
-
-    .content { padding: 32px; max-width: 1180px; }
-    .page-head h2 { margin: 0 0 4px; font-size: 2rem; letter-spacing: -.02em; }
-    .page-head p { margin: 0 0 24px; color: var(--muted); }
-
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 22px; margin-bottom: 22px; box-shadow: 0 1px 2px rgba(20,33,61,.04); }
-    .card h3 { margin: 0 0 16px; font-size: 1.05rem; }
-
-    /* stat tiles */
-    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; margin-bottom: 22px; }
-    .stat { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px; }
-    .stat span { color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
-    .stat strong { display: block; font-size: 2rem; margin-top: 6px; letter-spacing: -.02em; }
-    .stat:first-child strong { color: var(--accent); }
-
-    /* form */
-    form { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; align-items: end; }
-    .field { display: flex; flex-direction: column; gap: 6px; }
-    .field.span2 { grid-column: span 2; }
-    label { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 700; color: var(--muted); }
-    input, select { padding: 11px 12px; border: 1px solid var(--border); border-radius: 10px; font: inherit; background: #fff; color: var(--text); }
-    input:focus, select:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
-    .btn { padding: 12px 18px; border: 0; border-radius: 10px; background: var(--accent); color: #fff; font: inherit; font-weight: 700; cursor: pointer; box-shadow: 0 6px 14px rgba(47,109,246,.3); transition: background .15s, transform .1s; }
-    .btn:hover { background: var(--accent-dark); }
-    .btn:active { transform: translateY(1px); }
-    .btn:disabled { opacity: .6; cursor: wait; }
-    .btn.ghost { background: #fff; color: var(--text); border: 1px solid var(--border); box-shadow: none; }
-    .btn.ghost:hover { background: var(--bg); }
-    .form-actions { grid-column: span 2; display: flex; gap: 10px; }
-    .form-actions .btn:first-child { flex: 1; }
-
-    /* table */
-    .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
-    .toolbar h3 { margin: 0; }
-    .toolbar select { min-width: 190px; }
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; }
-    th { text-align: left; padding: 12px; font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); border-bottom: 1px solid var(--border); }
-    td { padding: 14px 12px; border-bottom: 1px solid var(--border); }
-    tbody tr:hover { background: #fafcff; }
-    tr.fresh { animation: flash 1.6s ease-out; }
-    @keyframes flash { from { background: var(--accent-soft); } to { background: transparent; } }
-    .id-chip { background: var(--accent-soft); color: var(--accent-dark); font-weight: 700; padding: 3px 10px; border-radius: 999px; font-size: .8rem; }
-    .doc-chip { background: var(--warn-soft); padding: 4px 10px; border-radius: 999px; font-size: .85rem; font-weight: 600; }
-    .patient { display: flex; align-items: center; gap: 10px; font-weight: 600; }
-    .patient .avatar { width: 30px; height: 30px; font-size: .72rem; background: var(--accent); }
-    .empty { text-align: center; color: var(--muted); padding: 32px; }
-
-    /* toast */
-    #toast { position: fixed; right: 24px; bottom: 24px; padding: 14px 18px; border-radius: 12px; font-weight: 600; box-shadow: 0 10px 30px rgba(20,33,61,.2); transform: translateY(20px); opacity: 0; pointer-events: none; transition: all .25s; max-width: 340px; }
-    #toast.show { transform: none; opacity: 1; }
-    #toast.success { background: var(--ok-soft); color: #0a6b44; border: 1px solid #a8e5c8; }
-    #toast.error { background: var(--err-soft); color: #9c1d30; border: 1px solid #f3b5bf; }
-
-    .view { display: none; }
-    .view.active { display: block; }
-
-    @media (max-width: 960px) {
-      .sidebar { display: none; }
-      .crumbs, .user div, .badge-api { display: none; }
-      .topbar { padding: 12px 16px; }
-      .content { padding: 20px 16px; }
-      form { grid-template-columns: 1fr 1fr; }
-    }
-    @media (max-width: 560px) {
-      form { grid-template-columns: 1fr; }
-      .field.span2, .form-actions { grid-column: auto; }
-      .page-head h2 { font-size: 1.5rem; }
-    }
-  </style>
+  <title>Hospital Appointment Booking · MediBook</title>
+  <meta name="description" content="MediBook - book, track and manage hospital appointments.">
+  <meta name="theme-color" content="#0a3d3a">
+  <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&display=swap">
+  <script src="/static/js/theme-init.js"></script>
+  <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-  <!-- ===== Sidebar navigation ===== -->
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="logo">+</div>
-      <div>
-        <h1>MediBook</h1>
-        <small>Hospital &bull; Appointments</small>
-      </div>
-    </div>
-    <div class="nav-label">Main navigation</div>
-    <nav class="nav" aria-label="Main navigation">
-      <button data-view="dashboard" class="active">Dashboard</button>
-      <button data-view="book">Book Appointment</button>
-      <button data-view="list">Appointments <span class="pill" id="nav-count">0</span></button>
-    </nav>
-    <div class="sidebar-foot">
-      <div class="status-box">
-        <div><span class="dot" id="side-dot"></span><b id="side-status">Checking API...</b></div>
-        <div class="row"><span>Endpoint: <code>/health</code></span><b id="side-ms">-</b></div>
-      </div>
-    </div>
-  </aside>
+  <a class="skip-link" href="#main">Skip to content</a>
 
-  <div class="main">
-    <!-- ===== Top bar ===== -->
-    <header class="topbar">
-      <div class="crumbs">Hospital &rsaquo; <b id="crumb">Dashboard</b></div>
-      <div class="search"><input type="search" id="search" placeholder="Search patient, doctor, date..." aria-label="Search appointments"></div>
-      <div class="badge-api" id="top-badge">API ...</div>
-      <div class="user"><div class="avatar">HR</div><div><b>Reception</b><small>Front desk</small></div></div>
+  <div class="app">
+    <!-- ===== Header ===== -->
+    <header class="site-header reveal">
+      <a class="brand" href="/" aria-label="MediBook home">
+        <img src="/static/img/logo-mark.svg" alt="" width="46" height="46">
+        <span>
+          <span class="brand-name">Medi<em>Book</em></span>
+          <span class="brand-tag">Hospital appointments</span>
+        </span>
+      </a>
+
+      <nav class="nav" aria-label="Main navigation">
+        <button type="button" data-view="overview" aria-current="page">Overview</button>
+        <button type="button" data-view="book">Book</button>
+        <button type="button" data-view="list">Appointments <span class="pill-count" id="nav-count">0</span></button>
+      </nav>
+
+      <div class="header-tools">
+        <div class="api-pill" id="api-pill" data-state="checking" role="status">
+          <span class="dot" aria-hidden="true"></span>
+          <span id="api-label">Checking API</span>
+          <small id="api-ms"></small>
+        </div>
+        <button type="button" class="icon-btn" id="theme-toggle" aria-label="Switch to dark theme">
+          <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        </button>
+      </div>
     </header>
 
-    <main class="content">
-      <div class="page-head">
-        <h2 id="page-title">Hospital Appointment Booking</h2>
-        <p id="page-sub">Book appointments, track the schedule and monitor service health.</p>
-      </div>
-
-      <!-- Stat tiles: always visible -->
-      <section class="stats" aria-label="Summary">
-        <div class="stat"><span>Total appointments</span><strong id="stat-total">0</strong></div>
-        <div class="stat"><span>Upcoming (today+)</span><strong id="stat-upcoming">0</strong></div>
-        <div class="stat"><span>Doctors booked</span><strong id="stat-doctors">0</strong></div>
-        <div class="stat"><span>Busiest doctor</span><strong id="stat-busy" style="font-size:1.2rem;padding-top:8px">-</strong></div>
+    <main id="main">
+      <!-- ===== Hero ===== -->
+      <section class="hero reveal d1" aria-labelledby="page-title">
+        <span class="eyebrow" id="today-label">Today</span>
+        <h1 id="page-title">Good day, <em>front desk.</em></h1>
+        <p id="page-sub">Loading today's schedule&hellip;</p>
       </section>
 
-      <!-- Booking form -->
-      <section class="card view active" data-for="dashboard book" id="book-card">
-        <h3>New appointment</h3>
-        <form id="booking-form">
-          <div class="field span2">
-            <label for="patient">Patient name</label>
-            <input type="text" id="patient" required placeholder="e.g. Rahul Verma">
+      <!-- ===== Bento stats ===== -->
+      <section class="bento" id="stats" aria-label="Summary" data-for="overview">
+        <article class="tile tile-hero reveal d2">
+          <span class="tile-label">Scheduled</span>
+          <strong class="tile-value" id="stat-scheduled">0</strong>
+          <p class="tile-note" id="stat-today">Nothing booked for today</p>
+        </article>
+
+        <article class="tile tile-next reveal d3">
+          <span class="tile-label">Next up</span>
+          <div class="next-name" id="next-name">No upcoming visits</div>
+          <div class="next-meta" id="next-meta"></div>
+        </article>
+
+        <article class="tile tile-busy reveal d4">
+          <span class="tile-label">Busiest doctor</span>
+          <strong class="tile-value" id="stat-busy">&ndash;</strong>
+          <p class="tile-note" id="stat-busy-note">No bookings yet</p>
+        </article>
+
+        <article class="tile tile-status reveal d5">
+          <div>
+            <span class="tile-label">All appointments</span>
+            <strong class="tile-value sm" id="stat-total">0</strong>
           </div>
-          <div class="field span2">
-            <label for="doctor">Doctor</label>
-            <select id="doctor" required>
-              <option value="Dr. Sharma">Dr. Sharma</option>
-              <option value="Dr. Mehta">Dr. Mehta</option>
-              <option value="Dr. Kulkarni">Dr. Kulkarni</option>
-              <option value="Dr. Rao">Dr. Rao</option>
+          <div>
+            <div class="status-bar" id="status-bar" role="img" aria-label="Appointment status breakdown">
+              <span class="seg-scheduled"></span><span class="seg-completed"></span><span class="seg-cancelled"></span>
+            </div>
+            <div class="legend">
+              <span><i class="seg-scheduled"></i>Scheduled <b id="lg-scheduled">0</b></span>
+              <span><i class="seg-completed"></i>Completed <b id="lg-completed">0</b></span>
+              <span><i class="seg-cancelled"></i>Cancelled <b id="lg-cancelled">0</b></span>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- ===== Workspace ===== -->
+      <div class="workspace" id="workspace">
+        <section class="panel panel-form reveal d6" id="book-panel" aria-labelledby="book-title">
+          <h2 id="book-title">New appointment</h2>
+          <p class="panel-sub">Pick a doctor, choose a slot, done.</p>
+
+          <form id="booking-form" novalidate>
+            <div class="field">
+              <label for="patient">Patient name</label>
+              <input type="text" id="patient" name="patient" required maxlength="80" autocomplete="off" placeholder="e.g. Rahul Verma">
+            </div>
+
+            <fieldset class="field">
+              <legend>Doctor</legend>
+              <div class="doctor-picker" id="doctor-picker"></div>
+            </fieldset>
+
+            <div class="field-row">
+              <div class="field">
+                <label for="date">Date</label>
+                <input type="date" id="date" name="date" required>
+              </div>
+              <div class="field">
+                <label for="time">Time</label>
+                <input type="time" id="time" name="time" required min="08:00" max="17:30" step="900">
+              </div>
+            </div>
+
+            <p class="form-error" id="form-error" role="alert"></p>
+
+            <div class="form-actions">
+              <button type="submit" class="btn" id="submit-btn">Book appointment</button>
+              <button type="reset" class="btn ghost">Clear</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel reveal d7" id="list-panel" aria-labelledby="list-title">
+          <div class="list-head">
+            <div>
+              <h2 id="list-title">Appointments</h2>
+              <p class="panel-sub" id="list-sub" aria-live="polite">Search, filter and manage every visit.</p>
+            </div>
+          </div>
+
+          <div class="filters">
+            <div class="search-box">
+              <input type="search" id="search" placeholder="Search patient, doctor, date&hellip;" aria-label="Search appointments">
+            </div>
+            <select id="filter-doctor" aria-label="Filter by doctor">
+              <option value="">All doctors</option>
             </select>
+            <div class="chips" id="status-chips" role="group" aria-label="Filter by status"></div>
           </div>
-          <div class="field">
-            <label for="date">Date</label>
-            <input type="date" id="date" required>
-          </div>
-          <div class="field">
-            <label for="time">Time</label>
-            <input type="time" id="time" required>
-          </div>
-          <div class="form-actions">
-            <button type="submit" class="btn" id="submit-btn">Book Appointment</button>
-            <button type="reset" class="btn ghost">Clear</button>
-          </div>
-        </form>
-      </section>
 
-      <!-- Appointments table -->
-      <section class="card view active" data-for="dashboard list" id="list-card">
-        <div class="toolbar">
-          <h3>Appointments</h3>
-          <select id="filter-doctor" aria-label="Filter by doctor">
-            <option value="">All doctors</option>
-          </select>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>ID</th><th>Patient</th><th>Doctor</th><th>Date</th><th>Time</th></tr></thead>
-            <tbody id="appointments-body"></tbody>
-          </table>
-        </div>
-      </section>
+          <ul class="appt-list" id="appointments">
+            <li class="skeleton"></li><li class="skeleton"></li>
+          </ul>
+        </section>
+      </div>
     </main>
+
+    <footer class="site-footer">
+      <span>MediBook &middot; Flask &middot; Prometheus &middot; Docker</span>
+      <span><a href="/metrics">Metrics</a> &middot; <a href="/health">Health</a></span>
+    </footer>
   </div>
 
-  <div id="toast" role="status"></div>
-
-  <script>
-    // ---------- State: the list of appointments fetched from the API ----------
-    let appointments = [];
-    let freshId = null; // id of the row just booked (used for the highlight animation)
-
-    // Shortcut for document.getElementById
-    const $ = (id) => document.getElementById(id);
-
-    // ---------- Navigation: show/hide sections depending on the clicked menu item ----------
-    const VIEWS = {
-      dashboard: { title: "Hospital Appointment Booking", sub: "Book appointments, track the schedule and monitor service health.", crumb: "Dashboard" },
-      book:      { title: "Book Appointment", sub: "Fill in the patient details and choose a doctor, date and time.", crumb: "Book Appointment" },
-      list:      { title: "Appointments", sub: "Search, filter and review every booked appointment.", crumb: "Appointments" }
-    };
-
-    function showView(name) {
-      document.querySelectorAll(".nav button").forEach(b => b.classList.toggle("active", b.dataset.view === name));
-      document.querySelectorAll("[data-for]").forEach(sec =>
-        sec.classList.toggle("active", sec.dataset.for.split(" ").includes(name)));
-      $("page-title").textContent = VIEWS[name].title;
-      $("page-sub").textContent = VIEWS[name].sub;
-      $("crumb").textContent = VIEWS[name].crumb;
-    }
-    document.querySelectorAll(".nav button").forEach(b => b.addEventListener("click", () => showView(b.dataset.view)));
-
-    // ---------- Toast: small popup message, green for success, red for errors ----------
-    let toastTimer;
-    function toast(text, type) {
-      const el = $("toast");
-      el.textContent = text;
-      el.className = "show " + type;
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => el.classList.remove("show"), 3500);
-    }
-
-    // ---------- Safe DOM helpers: textContent never interprets HTML (prevents XSS) ----------
-    function el(tag, className, text) {
-      const node = document.createElement(tag);
-      if (className) node.className = className;
-      if (text !== undefined) node.textContent = text;
-      return node;
-    }
-    const initials = (name) => name.trim().split(/\s+/).slice(0, 2).map(w => w[0].toUpperCase()).join("");
-
-    // ---------- Rendering: apply search + doctor filter, then draw the table ----------
-    function visibleAppointments() {
-      const q = $("search").value.trim().toLowerCase();
-      const doctor = $("filter-doctor").value;
-      return appointments.filter(a =>
-        (!doctor || a.doctor === doctor) &&
-        (!q || [a.patient, a.doctor, a.date, a.time].join(" ").toLowerCase().includes(q)));
-    }
-
-    function renderTable() {
-      const tbody = $("appointments-body");
-      tbody.replaceChildren();
-      const rows = visibleAppointments();
-
-      if (rows.length === 0) {
-        const tr = el("tr");
-        const td = el("td", "empty", appointments.length ? "No matching appointments" : "No appointments yet");
-        td.colSpan = 5;
-        tr.appendChild(td);
-        tbody.appendChild(tr);
-        return;
-      }
-      for (const a of rows) {
-        const tr = el("tr", a.id === freshId ? "fresh" : "");
-        tr.appendChild(el("td")).appendChild(el("span", "id-chip", "#" + a.id));
-        const patientCell = el("td");
-        const wrap = el("div", "patient");
-        wrap.append(el("div", "avatar", initials(a.patient)), el("span", "", a.patient));
-        patientCell.appendChild(wrap);
-        tr.appendChild(patientCell);
-        tr.appendChild(el("td")).appendChild(el("span", "doc-chip", a.doctor));
-        tr.append(el("td", "", a.date), el("td", "", a.time));
-        tbody.appendChild(tr);
-      }
-    }
-
-    // ---------- Stats: computed from the same list ----------
-    function renderStats() {
-      const today = new Date().toISOString().slice(0, 10);
-      const perDoctor = {};
-      appointments.forEach(a => perDoctor[a.doctor] = (perDoctor[a.doctor] || 0) + 1);
-      const busiest = Object.entries(perDoctor).sort((x, y) => y[1] - x[1])[0];
-
-      $("stat-total").textContent = appointments.length;
-      $("stat-upcoming").textContent = appointments.filter(a => a.date >= today).length;
-      $("stat-doctors").textContent = Object.keys(perDoctor).length;
-      $("stat-busy").textContent = busiest ? busiest[0] + " (" + busiest[1] + ")" : "-";
-      $("nav-count").textContent = appointments.length;
-    }
-
-    // Rebuild the doctor filter options from the data, keeping the current selection
-    function renderFilter() {
-      const select = $("filter-doctor");
-      const current = select.value;
-      const doctors = [...new Set(appointments.map(a => a.doctor))].sort();
-      select.replaceChildren(new Option("All doctors", ""), ...doctors.map(d => new Option(d, d)));
-      select.value = doctors.includes(current) ? current : "";
-    }
-
-    // ---------- GET /items: load appointments from the Flask API ----------
-    async function loadAppointments() {
-      try {
-        const response = await fetch("/items");
-        appointments = await response.json();
-        renderStats();
-        renderFilter();
-        renderTable();
-      } catch (err) {
-        toast("Could not load appointments.", "error");
-      }
-    }
-
-    // ---------- POST /items: send the form as JSON ----------
-    $("booking-form").addEventListener("submit", async (event) => {
-      event.preventDefault(); // stop the normal page reload
-      const button = $("submit-btn");
-      button.disabled = true;
-
-      const appointment = {
-        patient: $("patient").value.trim(),
-        doctor: $("doctor").value,
-        date: $("date").value,
-        time: $("time").value
-      };
-
-      try {
-        const response = await fetch("/items", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(appointment)
-        });
-        const data = await response.json();
-
-        if (response.ok) {                      // 201 Created
-          freshId = data.id;
-          toast("Appointment booked for " + data.patient + "!", "success");
-          event.target.reset();                 // clear the form
-          await loadAppointments();             // refresh table + stats
-        } else {                                // 400 -> show the server's error text
-          toast(data.error || "Booking failed.", "error");
-        }
-      } catch (err) {
-        toast("Network error. Please try again.", "error");
-      } finally {
-        button.disabled = false;
-      }
-    });
-
-    // Re-render when the user types in search or changes the doctor filter
-    $("search").addEventListener("input", renderTable);
-    $("filter-doctor").addEventListener("change", renderTable);
-
-    // ---------- Health check: ping /health every 15s and show latency ----------
-    async function checkHealth() {
-      const start = performance.now();
-      let up = false;
-      try {
-        up = (await fetch("/health")).ok;
-      } catch (err) { /* server unreachable */ }
-      const ms = Math.round(performance.now() - start);
-
-      $("side-dot").className = "dot " + (up ? "up" : "down");
-      $("side-status").textContent = up ? "API Operational" : "API Down";
-      $("side-ms").textContent = up ? ms + " ms" : "-";
-      $("top-badge").textContent = up ? "● API Operational" : "● API Down";
-      $("top-badge").className = "badge-api" + (up ? "" : " down");
-    }
-
-    // Start everything when the page opens
-    loadAppointments();
-    checkHealth();
-    setInterval(checkHealth, 15000);
-  </script>
+  <div class="toast" id="toast" role="status"></div>
+  <script type="module" src="/static/js/app.js"></script>
 </body>
 </html>

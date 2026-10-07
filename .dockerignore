@@ -1,0 +1,12 @@
+.git
+.github
+.gitignore
+.pytest_cache
+__pycache__
+*.pyc
+venv
+.venv
+test_app.py
+requirements-dev.txt
+README.md
+.coverage
